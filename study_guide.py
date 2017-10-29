@@ -60,11 +60,15 @@ def create_user():
 
 
 def select_user():
-    selection = ""
-    for (id, name) in get_users():
+    selection = "0"
+    users = get_users()
+    ids = []
+    for (id, name) in users:
         print("""%s: %s""" % (id, name))
+        ids.append(id)
 
-    selection = raw_input("Enter a user's number: ")
+    while int(selection) not in ids:
+        selection = raw_input("Enter a user's number: ")
 
     select_or_create_study_guide(int(selection))
 
