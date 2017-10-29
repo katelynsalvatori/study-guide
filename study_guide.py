@@ -44,6 +44,27 @@ def add_study_guide_to_db(name, owner_id):
     return cursor.fetchone()[0]
 
 
+def add_question_to_db(question_text, study_guide_id):
+    try:
+        cursor.execute("""INSERT INTO questions(question_text, study_guide_id) VALUES('%s', '%s');
+        SELECT currval('questions_id_seq');""" % (question_text, study_guide_id))
+        print "Question created successfully:", question_text
+        connection.commit()
+    except:
+        print "Could not create question"
+
+    return cursor.fetchone()[0]
+
+
+def add_answer_to_db(answer_text, question_id):
+    try:
+        cursor.execute("""INSERT INTO answers(answer_text, question_id) VALUES('%s', '%s');""" % (answer_text, question_id))
+        print "Answer created successfully:", answer_text
+        connection.commit()
+    except:
+        print "Could not create answer"
+
+
 def get_study_guides_for_user(owner_id):
     try:
         cursor.execute("""SELECT id, name FROM study_guides WHERE owner_id = '%s';""" % owner_id)
@@ -118,17 +139,43 @@ def select_study_guide(user_id):
     while int(selection) not in ids:
         selection = raw_input("Enter a study guide number: ")
 
-    begin_studying(int(selection))
+    study(int(selection))
 
 
 def create_study_guide(user_id):
     name = raw_input("Enter name of study guide: ").replace("'", "''")
     study_guide_id = add_study_guide_to_db(name, user_id)
+    create_questions(study_guide_id)
     select_or_create_study_guide(user_id)
 
 
+def create_questions(study_guide_id):
+    more_questions = True
+
+    while more_questions:
+        question_text = raw_input("Enter question text: ").replace("'", "''")
+        question_id = add_question_to_db(question_text, study_guide_id)
+        create_answers(question_id)
+        more = ""
+        while more != "y" and more != "n":
+            more = raw_input("More questions? (y/n): ")
+        more_questions = more == "y"
+
+
+def create_answers(question_id):
+    more_answers = True
+
+    while more_answers:
+        answer_text = raw_input("Enter answer text: ").replace("'", "''")
+        add_answer_to_db(answer_text, question_id)
+        more = ""
+        while more != "y" and more != "n":
+            more = raw_input("More answers? (y/n): ")
+        more_answers = more == "y"
+
+
 # ******** STUDYING ********
-def begin_studying(study_guide_id):
+def study(study_guide_id):
     return
 
 
