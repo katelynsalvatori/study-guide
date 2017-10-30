@@ -15,4 +15,5 @@ Follow the prompts on the command line.
 
 ## To do
 * Allow editing of questions and answers
+* Allow adding questions and answers
 * Allow deleting questions, answers, study guides, and users
