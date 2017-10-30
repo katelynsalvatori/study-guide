@@ -212,7 +212,7 @@ def study(study_guide_id):
 
         index += 1
 
-    percent_correct = 0 if len(questions) == 0 else float(num_correct / len(questions)) * 100
+    percent_correct = 0 if len(questions) == 0 else (float(num_correct) / float(len(questions))) * 100
     print "-----RESULTS-----"
     print "Correct answers: %s / %s = %s%%" % (num_correct, len(questions), percent_correct)
 
