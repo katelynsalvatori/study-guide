@@ -95,6 +95,8 @@ def get_answers_of_question(question_id):
 
 # ******** MENUS ********
 def select_or_create_user_menu():
+    print "-----MAIN MENU-----"
+
     selection = ""
 
     while selection != "1" and selection != "2" and selection != "3":
@@ -109,27 +111,37 @@ def select_or_create_user_menu():
 
 
 def select_or_create_study_guide(user_id):
+    print "-----STUDY GUIDE MENU-----"
     selection = ""
 
-    while selection != "1" and selection != "2":
-        selection = raw_input("1. Select exisiting study guide\n2. Create a new study guide\nSelect an option: ")
+    while selection != "1" and selection != "2" and selection != "3":
+        selection = raw_input("1. Select exisiting study guide\n2. Create a new study guide\n3. Quit\nSelect an option: ")
 
     if selection is "1":
         select_study_guide(user_id)
-    else:
+    elif selection is "2":
         create_study_guide(user_id)
+    else:
+        quit()
 
 
 # ******** USER MANAGEMENT ********
 def create_user():
+    print "-----USER CREATION-----"
     name = raw_input("Enter name of user: ")
     add_user_to_db(name)
     select_or_create_user_menu()
 
 
 def select_user():
+    print "-----USERS-----"
     selection = "0"
     users = get_users()
+
+    if len(users) == 0:
+        print "No users! Please create a user."
+        select_or_create_user_menu()
+
     ids = []
     for (id, name) in users:
         print("%s: %s" % (id, name))
@@ -143,6 +155,7 @@ def select_user():
 
 # ******** STUDY GUIDE MANAGEMENT ********
 def select_study_guide(user_id):
+    print "-----STUDY GUIDES----"
     selection = "0"
     study_guides = get_study_guides_for_user(user_id)
     ids = []
@@ -162,6 +175,7 @@ def select_study_guide(user_id):
 
 
 def create_study_guide(user_id):
+    print "-----STUDY GUIDE CREATION-----"
     name = raw_input("Enter name of study guide: ").replace("'", "''")
     study_guide_id = add_study_guide_to_db(name, user_id)
     create_questions(study_guide_id)
@@ -170,8 +184,10 @@ def create_study_guide(user_id):
 
 def create_questions(study_guide_id):
     more_questions = True
+    index = 1
 
     while more_questions:
+        print "Question %s." % index
         question_text = raw_input("Enter question text: ").replace("'", "''")
         question_id = add_question_to_db(question_text, study_guide_id)
         create_answers(question_id)
@@ -179,18 +195,22 @@ def create_questions(study_guide_id):
         while more != "y" and more != "n":
             more = raw_input("More questions? (y/n): ")
         more_questions = more == "y"
+        index += 1
 
 
 def create_answers(question_id):
     more_answers = True
+    index = 1
 
     while more_answers:
+        print "Answer %s." % index
         answer_text = raw_input("Enter answer text: ").replace("'", "''")
         add_answer_to_db(answer_text, question_id)
         more = ""
         while more != "y" and more != "n":
             more = raw_input("More answers? (y/n): ")
         more_answers = more == "y"
+        index += 1
 
 
 # ******** STUDYING ********
@@ -202,7 +222,8 @@ def study(study_guide_id):
 
     for (question_id, question_text) in questions:
         answers = get_answers_of_question(question_id)
-        print "%s. %s" % (index, question_text)
+        print "---QUESTION %s---" % index
+        print question_text
         print "(Number of answers: %s)" % len(answers)
         correct = process_answers([x.lower() for x in answers])
         num_correct += 1 if correct else 0
