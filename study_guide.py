@@ -1,6 +1,12 @@
 import psycopg2
 from random import shuffle
 
+# COLORS!
+DEFAULT = '\033[0m'
+GREEN = '\033[92m'
+YELLOW = '\033[93m'
+BLUE = '\033[94m'
+
 # ******** DATABASE ********
 try:
     connection = psycopg2.connect("dbname='study_guide' user='admin' host='localhost' password=''")
@@ -14,6 +20,7 @@ cursor = connection.cursor()
 def could_not_access_db():
     print "Could not access the database"
     quit()
+
 
 def get_users():
     try:
@@ -59,7 +66,8 @@ def add_question_to_db(question_text, study_guide_id):
 
 def add_answer_to_db(answer_text, question_id):
     try:
-        cursor.execute("""INSERT INTO answers(answer_text, question_id) VALUES('%s', '%s');""" % (answer_text, question_id))
+        cursor.execute(
+            """INSERT INTO answers(answer_text, question_id) VALUES('%s', '%s');""" % (answer_text, question_id))
         print "Answer created successfully"
         connection.commit()
     except:
@@ -115,7 +123,8 @@ def select_or_create_study_guide(user_id):
     selection = ""
 
     while selection != "1" and selection != "2" and selection != "3":
-        selection = raw_input("1. Select exisiting study guide\n2. Create a new study guide\n3. Quit\nSelect an option: ")
+        selection = raw_input(
+            "1. Select exisiting study guide\n2. Create a new study guide\n3. Quit\nSelect an option: ")
 
     if selection is "1":
         select_study_guide(user_id)
@@ -222,7 +231,7 @@ def study(study_guide_id):
 
     for (question_id, question_text) in questions:
         answers = get_answers_of_question(question_id)
-        print "---QUESTION %s---" % index
+        print BLUE + "---QUESTION %s---" % index + DEFAULT
         print question_text
         print "(Number of answers: %s)" % len(answers)
         correct = process_answers([x.lower() for x in answers])
@@ -245,13 +254,13 @@ def process_answers(answers):
         answer = raw_input("Answer %s: " % str(i + 1)).lower()
 
         if answer in answers and answer not in entered_answers:
-            print "Correct answer"
+            print GREEN + "Correct answer" + DEFAULT
         elif answer not in answers:
-            print "Incorrect answer"
+            print YELLOW + "Incorrect answer" + DEFAULT
             correct = False
             break
         elif answer in entered_answers:
-            print "You have already entered this answer"
+            print YELLOW + "You have already entered this answer" + DEFAULT
             correct = False
             break
         entered_answers.add(answer)
