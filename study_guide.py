@@ -253,7 +253,6 @@ def study(study_guide_id):
 
 def process_answers(answers):
     entered_answers = set()
-    correct = True
     for i in range(0, len(answers)):
         answer = raw_input("Answer %s: " % str(i + 1)).lower()
 
@@ -261,22 +260,18 @@ def process_answers(answers):
             print GREEN + "Correct answer" + DEFAULT
         elif answer not in answers:
             print YELLOW + "Incorrect answer" + DEFAULT
-            correct = False
-            break
+            return False
         elif answer in entered_answers:
             print YELLOW + "You have already entered this answer" + DEFAULT
-            correct = False
-            break
+            return False
         entered_answers.add(answer)
-    return correct
+    return True
 
 
 def print_answers(answers):
-    index = 1
-    for answer in answers:
-        print "ANSWERS:"
-        print "%s. %s" % (index, answer)
-        index += 1
+    print "ANSWERS:"
+    for index in range (0, len(answers)):
+        print "%d. %s" % (index + 1, answers[index])
 
 
 # ******** MAIN ********
