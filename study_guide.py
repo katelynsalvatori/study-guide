@@ -102,27 +102,30 @@ def get_answers_of_question(question_id):
 
 
 # ******** MENUS ********
-def select_or_create_user_menu():
-    print "-----MAIN MENU-----"
-
+def user_menu():
+    print "-----USER MENU-----"
     selection = ""
 
-    while selection != "1" and selection != "2" and selection != "3":
+    choices = [str(x) for x in range(1, 4)]
+
+    while selection not in choices:
         selection = raw_input("1. Select an existing user\n2. Create a new user\n3. Quit\nEnter an option: ")
 
-        if selection is "1":
-            select_user()
-        elif selection is "2":
-            create_user()
-        else:
-            quit()
+    if selection is "1":
+        select_user()
+    elif selection is "2":
+        create_user()
+    else:
+        quit()
 
 
-def select_or_create_study_guide(user_id):
+def study_guide_menu(user_id):
     print "-----STUDY GUIDE MENU-----"
     selection = ""
 
-    while selection != "1" and selection != "2" and selection != "3":
+    choices = [str(x) for x in range(1, 4)]
+
+    while selection not in choices:
         selection = raw_input(
             "1. Select exisiting study guide\n2. Create a new study guide\n3. Quit\nSelect an option: ")
 
@@ -139,7 +142,7 @@ def create_user():
     print "-----USER CREATION-----"
     name = raw_input("Enter name of user: ")
     add_user_to_db(name)
-    select_or_create_user_menu()
+    user_menu()
 
 
 def select_user():
@@ -149,7 +152,7 @@ def select_user():
 
     if len(users) == 0:
         print "No users! Please create a user."
-        select_or_create_user_menu()
+        user_menu()
 
     ids = []
     for (id, name) in users:
@@ -159,7 +162,7 @@ def select_user():
     while int(selection) not in ids:
         selection = raw_input("Enter a user's number: ")
 
-    select_or_create_study_guide(int(selection))
+    study_guide_menu(int(selection))
 
 
 # ******** STUDY GUIDE MANAGEMENT ********
@@ -171,7 +174,7 @@ def select_study_guide(user_id):
 
     if len(study_guides) == 0:
         print "No study guides for selected user! Please create a study guide."
-        select_or_create_study_guide(user_id)
+        study_guide_menu(user_id)
 
     for (id, name) in study_guides:
         print("%s: %s" % (id, name))
@@ -188,7 +191,7 @@ def create_study_guide(user_id):
     name = raw_input("Enter name of study guide: ").replace("'", "''")
     study_guide_id = add_study_guide_to_db(name, user_id)
     create_questions(study_guide_id)
-    select_or_create_study_guide(user_id)
+    study_guide_menu(user_id)
 
 
 def create_questions(study_guide_id):
@@ -245,7 +248,7 @@ def study(study_guide_id):
     percent_correct = 0 if len(questions) == 0 else (float(num_correct) / float(len(questions))) * 100
     print "-----RESULTS-----"
     print "Correct answers: %s / %s = %.2f%%" % (num_correct, len(questions), percent_correct)
-    select_or_create_user_menu()
+    user_menu()
 
 
 def process_answers(answers):
@@ -278,4 +281,4 @@ def print_answers(answers):
 
 # ******** MAIN ********
 if __name__ == '__main__':
-    select_or_create_user_menu()
+    user_menu()
