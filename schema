@@ -74,7 +74,8 @@ ALTER SEQUENCE answers_id_seq OWNED BY answers.id;
 CREATE TABLE questions (
     id integer NOT NULL,
     question_text character varying(64) NOT NULL,
-    study_guide_id integer NOT NULL
+    study_guide_id integer NOT NULL,
+    enabled boolean DEFAULT true
 );
 
 
@@ -215,7 +216,7 @@ SELECT pg_catalog.setval('answers_id_seq', 1, false);
 -- Data for Name: questions; Type: TABLE DATA; Schema: public; Owner: katelynsalvatori
 --
 
-COPY questions (id, question_text, study_guide_id) FROM stdin;
+COPY questions (id, question_text, study_guide_id, enabled) FROM stdin;
 \.
 
 

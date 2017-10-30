@@ -85,7 +85,7 @@ def get_study_guides_for_user(owner_id):
 
 def get_questions_from_study_guide(study_guide_id):
     try:
-        cursor.execute("""SELECT id, question_text FROM questions WHERE study_guide_id = '%s';""" % study_guide_id)
+        cursor.execute("""SELECT id, question_text FROM questions WHERE study_guide_id = '%s' and enabled;""" % study_guide_id)
     except:
         could_not_access_db()
 
@@ -244,7 +244,8 @@ def study(study_guide_id):
 
     percent_correct = 0 if len(questions) == 0 else (float(num_correct) / float(len(questions))) * 100
     print "-----RESULTS-----"
-    print "Correct answers: %s / %s = %s%%" % (num_correct, len(questions), percent_correct)
+    print "Correct answers: %s / %s = %.2f%%" % (num_correct, len(questions), percent_correct)
+    select_or_create_user_menu()
 
 
 def process_answers(answers):
