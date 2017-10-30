@@ -1,4 +1,5 @@
 import psycopg2
+from random import shuffle
 
 # ******** DATABASE ********
 try:
@@ -26,7 +27,7 @@ def get_users():
 def add_user_to_db(name):
     try:
         cursor.execute("""INSERT INTO users(name) VALUES('%s');""" % name)
-        print "User created successfully:", name
+        print "User created successfully"
         connection.commit()
     except:
         print "Could not create user - make sure your username is unique"
@@ -36,7 +37,7 @@ def add_study_guide_to_db(name, owner_id):
     try:
         cursor.execute("""INSERT INTO study_guides(name, owner_id) VALUES('%s', '%s');
         SELECT currval('study_guides_id_seq');""" % (name, owner_id))
-        print "Study guide created successfully:", name
+        print "Study guide created successfully"
         connection.commit()
     except:
         print "Could not create study guide"
@@ -48,7 +49,7 @@ def add_question_to_db(question_text, study_guide_id):
     try:
         cursor.execute("""INSERT INTO questions(question_text, study_guide_id) VALUES('%s', '%s');
         SELECT currval('questions_id_seq');""" % (question_text, study_guide_id))
-        print "Question created successfully:", question_text
+        print "Question created successfully"
         connection.commit()
     except:
         print "Could not create question"
@@ -59,7 +60,7 @@ def add_question_to_db(question_text, study_guide_id):
 def add_answer_to_db(answer_text, question_id):
     try:
         cursor.execute("""INSERT INTO answers(answer_text, question_id) VALUES('%s', '%s');""" % (answer_text, question_id))
-        print "Answer created successfully:", answer_text
+        print "Answer created successfully"
         connection.commit()
     except:
         print "Could not create answer"
@@ -72,6 +73,24 @@ def get_study_guides_for_user(owner_id):
         could_not_access_db()
 
     return cursor.fetchall()
+
+
+def get_questions_from_study_guide(study_guide_id):
+    try:
+        cursor.execute("""SELECT id, question_text FROM questions WHERE study_guide_id = '%s';""" % study_guide_id)
+    except:
+        could_not_access_db()
+
+    return cursor.fetchall()
+
+
+def get_answers_of_question(question_id):
+    try:
+        cursor.execute("""SELECT answer_text FROM answers WHERE question_id = '%s';""" % question_id)
+    except:
+        could_not_access_db()
+
+    return [x[0] for x in cursor.fetchall()]
 
 
 # ******** MENUS ********
@@ -176,7 +195,54 @@ def create_answers(question_id):
 
 # ******** STUDYING ********
 def study(study_guide_id):
-    return
+    questions = get_questions_from_study_guide(study_guide_id)
+    shuffle(questions)
+    num_correct = 0
+    index = 1
+
+    for (question_id, question_text) in questions:
+        answers = get_answers_of_question(question_id)
+        print "%s. %s" % (index, question_text)
+        print "(Number of answers: %s)" % len(answers)
+        correct = process_answers([x.lower() for x in answers])
+        num_correct += 1 if correct else 0
+
+        if not correct:
+            print_answers(answers)
+
+        index += 1
+
+    percent_correct = 0 if len(questions) == 0 else float(num_correct / len(questions)) * 100
+    print "-----RESULTS-----"
+    print "Correct answers: %s / %s = %s%%" % (num_correct, len(questions), percent_correct)
+
+
+def process_answers(answers):
+    entered_answers = set()
+    correct = True
+    for i in range(0, len(answers)):
+        answer = raw_input("Answer %s: " % str(i + 1)).lower()
+
+        if answer in answers and answer not in entered_answers:
+            print "Correct answer"
+        elif answer not in answers:
+            print "Incorrect answer"
+            correct = False
+            break
+        elif answer in entered_answers:
+            print "You have already entered this answer"
+            correct = False
+            break
+        entered_answers.add(answer)
+    return correct
+
+
+def print_answers(answers):
+    index = 1
+    for answer in answers:
+        print "ANSWERS:"
+        print "%s. %s" % (index, answer)
+        index += 1
 
 
 # ******** MAIN ********
