@@ -73,7 +73,7 @@ ALTER SEQUENCE answers_id_seq OWNED BY answers.id;
 
 CREATE TABLE questions (
     id integer NOT NULL,
-    question_text character varying(64) NOT NULL,
+    question_text character varying(256) NOT NULL,
     study_guide_id integer NOT NULL,
     enabled boolean DEFAULT true
 );
