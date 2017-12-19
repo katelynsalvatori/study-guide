@@ -1,5 +1,5 @@
-import psycopg2
 from random import shuffle
+import db_tools
 
 # COLORS!
 DEFAULT = '\033[0m'
@@ -7,109 +7,30 @@ GREEN = '\033[92m'
 YELLOW = '\033[93m'
 BLUE = '\033[94m'
 
-# ******** DATABASE ********
-try:
-    connection = psycopg2.connect("dbname='study_guide' user='admin' host='localhost' password=''")
-except:
-    print "ERROR: Unable to connect to the database"
-    quit()
-
-cursor = connection.cursor()
-
-
-def could_not_access_db():
-    print "Could not access the database"
-    quit()
-
-
-def get_users():
-    try:
-        cursor.execute("""SELECT * FROM users;""")
-    except:
-        could_not_access_db()
-
-    return cursor.fetchall()
-
-
-def add_user_to_db(name):
-    try:
-        cursor.execute("""INSERT INTO users(name) VALUES('%s');""" % name)
-        print "User created successfully"
-        connection.commit()
-    except:
-        print "Could not create user - make sure your username is unique"
-
-
-def add_study_guide_to_db(name, owner_id):
-    try:
-        cursor.execute("""INSERT INTO study_guides(name, owner_id) VALUES('%s', '%s');
-        SELECT currval('study_guides_id_seq');""" % (name, owner_id))
-        print "Study guide created successfully"
-        connection.commit()
-    except:
-        print "Could not create study guide"
-
-    return cursor.fetchone()[0]
-
-
-def add_question_to_db(question_text, study_guide_id):
-    try:
-        cursor.execute("""INSERT INTO questions(question_text, study_guide_id) VALUES('%s', '%s');
-        SELECT currval('questions_id_seq');""" % (question_text, study_guide_id))
-        print "Question created successfully"
-        connection.commit()
-    except:
-        print "Could not create question"
-
-    return cursor.fetchone()[0]
-
-
-def add_answer_to_db(answer_text, question_id):
-    try:
-        cursor.execute(
-            """INSERT INTO answers(answer_text, question_id) VALUES('%s', '%s');""" % (answer_text, question_id))
-        print "Answer created successfully"
-        connection.commit()
-    except:
-        print "Could not create answer"
-
-
-def get_study_guides_for_user(owner_id):
-    try:
-        cursor.execute("""SELECT id, name FROM study_guides WHERE owner_id = '%s';""" % owner_id)
-    except:
-        could_not_access_db()
-
-    return cursor.fetchall()
-
-
-def get_questions_from_study_guide(study_guide_id):
-    try:
-        cursor.execute("""SELECT id, question_text FROM questions WHERE study_guide_id = '%s' and enabled;""" % study_guide_id)
-    except:
-        could_not_access_db()
-
-    return cursor.fetchall()
-
-
-def get_answers_of_question(question_id):
-    try:
-        cursor.execute("""SELECT answer_text FROM answers WHERE question_id = '%s';""" % question_id)
-    except:
-        could_not_access_db()
-
-    return [x[0] for x in cursor.fetchall()]
-
-
 # ******** MENUS ********
-def user_menu():
-    print "-----USER MENU-----"
+def menu(choice_texts):
     selection = ""
+    choices = [str(x) for x in range(1, len(choice_texts) + 1)]
 
-    choices = [str(x) for x in range(1, 4)]
+    for i in range(len(choice_texts)):
+        print str(i + 1) + ".", choice_texts[i]
 
     while selection not in choices:
-        selection = raw_input("1. Select an existing user\n2. Create a new user\n3. Quit\nEnter an option: ")
+        selection = raw_input("Enter an option: ")
+
+    return selection
+
+
+def user_menu():
+    print "-----USER MENU-----"
+
+    choice_texts = [
+        "Select an existing user",
+        "Create a new user",
+        "Quit"
+    ]
+
+    selection = menu(choice_texts)
 
     if selection is "1":
         select_user()
@@ -121,34 +42,41 @@ def user_menu():
 
 def study_guide_menu(user_id):
     print "-----STUDY GUIDE MENU-----"
-    selection = ""
 
-    choices = [str(x) for x in range(1, 4)]
-
-    while selection not in choices:
-        selection = raw_input(
-            "1. Select exisiting study guide\n2. Create a new study guide\n3. Quit\nSelect an option: ")
+    choice_texts = [
+        "Study an existing study guide",
+        "Create a new study guide",
+        "Edit a study guide (IN PROGRESS)",
+        "Quit"
+    ]
+    selection = menu(choice_texts)
 
     if selection is "1":
-        select_study_guide(user_id)
+        study_study_guide(user_id)
     elif selection is "2":
         create_study_guide(user_id)
+    elif selection is "3":
+        choose_study_guide_to_edit(user_id)
     else:
         quit()
+
+
+def question_edit_menu():
+    print "question edit menu"
 
 
 # ******** USER MANAGEMENT ********
 def create_user():
     print "-----USER CREATION-----"
     name = raw_input("Enter name of user: ")
-    add_user_to_db(name)
+    db_tools.add_user_to_db(name)
     user_menu()
 
 
 def select_user():
     print "-----USERS-----"
     selection = "0"
-    users = get_users()
+    users = db_tools.get_users()
 
     if len(users) == 0:
         print "No users! Please create a user."
@@ -166,10 +94,14 @@ def select_user():
 
 
 # ******** STUDY GUIDE MANAGEMENT ********
+def study_study_guide(user_id):
+    study_guide = select_study_guide(user_id)
+    study(study_guide)
+
 def select_study_guide(user_id):
     print "-----STUDY GUIDES----"
     selection = "0"
-    study_guides = get_study_guides_for_user(user_id)
+    study_guides = db_tools.get_study_guides_for_user(user_id)
     ids = []
 
     if len(study_guides) == 0:
@@ -183,15 +115,42 @@ def select_study_guide(user_id):
     while int(selection) not in ids:
         selection = raw_input("Enter a study guide number: ")
 
-    study(int(selection))
+    return int(selection)
 
 
 def create_study_guide(user_id):
     print "-----STUDY GUIDE CREATION-----"
     name = raw_input("Enter name of study guide: ").replace("'", "''")
-    study_guide_id = add_study_guide_to_db(name, user_id)
+    study_guide_id = db_tools.add_study_guide_to_db(name, user_id)
     create_questions(study_guide_id)
     study_guide_menu(user_id)
+
+
+def choose_study_guide_to_edit(user_id):
+    study_guide = select_study_guide(user_id)
+    edit_study_guide(study_guide)
+    study_guide_menu(user_id)
+
+
+def edit_study_guide(study_guide_id):
+    questions = db_tools.get_questions_from_study_guide(study_guide_id)
+    ids = []
+    print "-----QUESTIONS-----"
+
+    for (question_id, question_text) in questions:
+        print "%d. %s" % (question_id, question_text)
+        ids.append(question_id)
+
+    question_selection = 0
+    more_edits = True
+    while more_edits:
+        while question_selection not in ids:
+            question_selection = int(raw_input("Enter ID of question to edit: "))
+        edit_question(question_selection)
+        more = ""
+        while more != "y" and more != "n":
+            more = raw_input(YELLOW + "More question edits (y/n)?" + DEFAULT)
+        more_edits = more == "y"
 
 
 def create_questions(study_guide_id):
@@ -199,13 +158,13 @@ def create_questions(study_guide_id):
     index = 1
 
     while more_questions:
-        print "Question %s." % index
+        print BLUE + "Question %s." % index + DEFAULT
         question_text = raw_input("Enter question text: ").replace("'", "''")
-        question_id = add_question_to_db(question_text, study_guide_id)
+        question_id = db_tools.add_question_to_db(question_text, study_guide_id)
         create_answers(question_id)
         more = ""
         while more != "y" and more != "n":
-            more = raw_input("More questions? (y/n): ")
+            more = raw_input(YELLOW + "More questions? (y/n): " + DEFAULT)
         more_questions = more == "y"
         index += 1
 
@@ -215,25 +174,29 @@ def create_answers(question_id):
     index = 1
 
     while more_answers:
-        print "Answer %s." % index
+        print BLUE + "Answer %s." % index + DEFAULT
         answer_text = raw_input("Enter answer text: ").replace("'", "''")
-        add_answer_to_db(answer_text, question_id)
+        db_tools.add_answer_to_db(answer_text, question_id)
         more = ""
         while more != "y" and more != "n":
-            more = raw_input("More answers? (y/n): ")
+            more = raw_input(YELLOW + "More answers? (y/n): " + DEFAULT)
         more_answers = more == "y"
         index += 1
 
 
+def edit_question(question_id):
+    return
+
+
 # ******** STUDYING ********
 def study(study_guide_id):
-    questions = get_questions_from_study_guide(study_guide_id)
+    questions = db_tools.get_questions_from_study_guide(study_guide_id)
     shuffle(questions)
     num_correct = 0
     index = 1
 
     for (question_id, question_text) in questions:
-        answers = get_answers_of_question(question_id)
+        answers = db_tools.get_answers_of_question(question_id)
         print BLUE + "---QUESTION %s---" % index + DEFAULT
         print question_text
         print "(Number of answers: %s)" % len(answers)
