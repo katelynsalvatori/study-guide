@@ -8,7 +8,9 @@ YELLOW = '\033[93m'
 BLUE = '\033[94m'
 
 # ******** MENUS ********
-def menu(choice_texts):
+def menu(choice_texts, menu_header = "MENU"):
+    print "-----" + menu_header + "-----"
+
     selection = ""
     choices = [str(x) for x in range(1, len(choice_texts) + 1)]
 
@@ -22,15 +24,13 @@ def menu(choice_texts):
 
 
 def user_menu():
-    print "-----USER MENU-----"
-
     choice_texts = [
         "Select an existing user",
         "Create a new user",
         "Quit"
     ]
 
-    selection = menu(choice_texts)
+    selection = menu(choice_texts, "USER MENU")
 
     if selection is "1":
         select_user()
@@ -41,15 +41,13 @@ def user_menu():
 
 
 def study_guide_menu(user_id):
-    print "-----STUDY GUIDE MENU-----"
-
     choice_texts = [
         "Study an existing study guide",
         "Create a new study guide",
         "Edit a study guide (IN PROGRESS)",
         "Quit"
     ]
-    selection = menu(choice_texts)
+    selection = menu(choice_texts, "STUDY GUIDE MENU")
 
     if selection is "1":
         study_study_guide(user_id)
@@ -62,7 +60,13 @@ def study_guide_menu(user_id):
 
 
 def question_edit_menu():
-    print "question edit menu"
+    choice_texts = [
+        "Edit question text",
+        "Edit answer(s)",
+        "Go back"
+    ]
+
+    selection = menu(choice_texts, "EDIT QUESTION MENU")
 
 
 # ******** USER MANAGEMENT ********
