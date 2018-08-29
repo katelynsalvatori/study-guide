@@ -125,6 +125,29 @@ def delete_user():
 
     user_menu()
 
+def update_user_name():
+    print "-----UPDATE USER NAME-----"
+    selection = "0"
+    users = db_tools.get_users()
+
+    if len(users) == 0:
+        print "No users! Please create a user."
+        user_menu()
+
+    ids = []
+    for (id, name) in users:
+        print("%s: %s" % (id, name))
+        ids.append(id)
+
+    while int(selection) not in ids:
+        selection = raw_input("Enter a user's number to update name: ")
+
+    new_name = raw_input("Enter a new name for the user: ")
+
+    db_tools.update_user_name_in_db(selection, new_name)
+
+    user_menu()
+
 
 # ******** STUDY GUIDE MANAGEMENT ********
 def study_study_guide(user_id):

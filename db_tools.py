@@ -39,6 +39,14 @@ def delete_user_from_db(user_id):
     except:
         print "Could not delete user"
 
+def update_user_name_in_db(user_id, new_name):
+    try:
+        cursor.execute("""UPDATE users SET name = '%s' WHERE id = %s""" % (new_name, user_id))
+        print "User name updated successfully"
+        connection.commit()
+    except:
+        print "Could not update username - make sure your new name is unique"
+
 
 def add_study_guide_to_db(name, owner_id):
     try:
