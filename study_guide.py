@@ -27,6 +27,8 @@ def user_menu():
     choice_texts = [
         "Select an existing user",
         "Create a new user",
+        "Delete a user",
+        "Update a user's name",
         "Quit"
     ]
 
@@ -36,6 +38,10 @@ def user_menu():
         select_user()
     elif selection is "2":
         create_user()
+    elif selection is "3":
+        delete_user()
+    elif selection is "4":
+        update_user_name()
     else:
         quit()
 
@@ -63,6 +69,8 @@ def question_edit_menu():
     choice_texts = [
         "Edit question text",
         "Edit answer(s)",
+        "Delete question(s)",
+        "Delete answer(s)",
         "Go back"
     ]
 
@@ -95,6 +103,27 @@ def select_user():
         selection = raw_input("Enter a user's number: ")
 
     study_guide_menu(int(selection))
+
+def delete_user():
+    print "-----DELETE USER-----"
+    selection = "0"
+    users = db_tools.get_users()
+
+    if len(users) == 0:
+        print "No users! Please create a user."
+        user_menu()
+
+    ids = []
+    for (id, name) in users:
+        print("%s: %s" % (id, name))
+        ids.append(id)
+
+    while int(selection) not in ids:
+        selection = raw_input("Enter a user's number to delete: ")
+
+    db_tools.delete_user_from_db(selection)
+
+    user_menu()
 
 
 # ******** STUDY GUIDE MANAGEMENT ********

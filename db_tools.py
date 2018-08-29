@@ -31,6 +31,14 @@ def add_user_to_db(name):
     except:
         print "Could not create user - make sure your username is unique"
 
+def delete_user_from_db(user_id):
+    try:
+        cursor.execute("""DELETE FROM users WHERE id = %s;""" % user_id)
+        print "User deleted successfully"
+        connection.commit()
+    except:
+        print "Could not delete user"
+
 
 def add_study_guide_to_db(name, owner_id):
     try:
