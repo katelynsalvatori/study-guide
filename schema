@@ -310,7 +310,7 @@ ALTER TABLE ONLY users
 --
 
 ALTER TABLE ONLY answers
-    ADD CONSTRAINT answers_question_id_fkey FOREIGN KEY (question_id) REFERENCES questions(id);
+    ADD CONSTRAINT answers_question_id_fkey FOREIGN KEY (question_id) REFERENCES questions(id) ON DELETE CASCADE;
 
 
 --
@@ -318,7 +318,7 @@ ALTER TABLE ONLY answers
 --
 
 ALTER TABLE ONLY questions
-    ADD CONSTRAINT questions_study_guide_id_fkey FOREIGN KEY (study_guide_id) REFERENCES study_guides(id);
+    ADD CONSTRAINT questions_study_guide_id_fkey FOREIGN KEY (study_guide_id) REFERENCES study_guides(id) ON DELETE CASCADE;
 
 
 --
@@ -326,7 +326,7 @@ ALTER TABLE ONLY questions
 --
 
 ALTER TABLE ONLY study_guides
-    ADD CONSTRAINT study_guides_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES users(id);
+    ADD CONSTRAINT study_guides_owner_id_fkey FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE;
 
 
 --

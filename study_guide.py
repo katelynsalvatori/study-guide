@@ -9,7 +9,7 @@ BLUE = '\033[94m'
 
 # ******** MENUS ********
 def menu(choice_texts, menu_header = "MENU"):
-    print "-----" + menu_header + "-----"
+    print_header(menu_header)
 
     selection = ""
     choices = [str(x) for x in range(1, len(choice_texts) + 1)]
@@ -21,7 +21,6 @@ def menu(choice_texts, menu_header = "MENU"):
         selection = raw_input("Enter an option: ")
 
     return selection
-
 
 def user_menu():
     choice_texts = [
@@ -51,6 +50,7 @@ def study_guide_menu(user_id):
         "Study an existing study guide",
         "Create a new study guide",
         "Edit a study guide (IN PROGRESS)",
+        "Go back",
         "Quit"
     ]
     selection = menu(choice_texts, "STUDY GUIDE MENU")
@@ -61,32 +61,67 @@ def study_guide_menu(user_id):
         create_study_guide(user_id)
     elif selection is "3":
         choose_study_guide_to_edit(user_id)
+    elif selection is "4":
+        user_menu()
     else:
         quit()
 
-
-def question_edit_menu():
+def question_edit_menu(question_id, study_guide_id, user_id):
     choice_texts = [
         "Edit question text",
         "Edit answer(s)",
-        "Delete question(s)",
-        "Delete answer(s)",
-        "Go back"
+        "Add answer(s)",
+        "Delete question",
+        "Go back",
+        "Quit"
     ]
-
     selection = menu(choice_texts, "EDIT QUESTION MENU")
 
+    if selection is "1":
+        edit_question_text(question_id, study_guide_id, user_id)
+    elif selection is "2":
+        "ok"
+        # edit answers (text or delete)
+    elif selection is "3":
+        create_answers(question_id)
+    elif selection is "4":
+        delete_question(question_id, study_guide_id, user_id)
+    elif selection is "5":
+        study_guide_edit_menu(study_guide_id, user_id)
+    else:
+        quit()
+
+def study_guide_edit_menu(study_guide_id, user_id):
+    choice_texts = [
+        "Edit questions/answers",
+        "Add question(s)",
+        "Delete study guide",
+        "Go back",
+        "Quit"
+    ]
+    selection = menu(choice_texts, "EDIT STUDY GUIDE MENU")
+
+    if selection is "1":
+        edit_questions(study_guide_id, user_id)
+    elif selection is "2":
+        create_questions(study_guide_id)
+    elif selection is "3":
+        delete_study_guide(study_guide_id, user_id)
+    elif selection is "4":
+        study_guide_menu(user_id)
+    else:
+        quit()
 
 # ******** USER MANAGEMENT ********
 def create_user():
-    print "-----USER CREATION-----"
+    print_header("USER CREATION")
     name = raw_input("Enter name of user: ")
     db_tools.add_user_to_db(name)
     user_menu()
 
 
 def select_user():
-    print "-----USERS-----"
+    print_header("USERS")
     selection = "0"
     users = db_tools.get_users()
 
@@ -105,7 +140,7 @@ def select_user():
     study_guide_menu(int(selection))
 
 def delete_user():
-    print "-----DELETE USER-----"
+    print_header("DELETE USER")
     selection = "0"
     users = db_tools.get_users()
 
@@ -126,7 +161,7 @@ def delete_user():
     user_menu()
 
 def update_user_name():
-    print "-----UPDATE USER NAME-----"
+    print_header("UPDATE USER NAME")
     selection = "0"
     users = db_tools.get_users()
 
@@ -155,7 +190,7 @@ def study_study_guide(user_id):
     study(study_guide)
 
 def select_study_guide(user_id):
-    print "-----STUDY GUIDES----"
+    print_header("STUDY GUIDES")
     selection = "0"
     study_guides = db_tools.get_study_guides_for_user(user_id)
     ids = []
@@ -175,7 +210,7 @@ def select_study_guide(user_id):
 
 
 def create_study_guide(user_id):
-    print "-----STUDY GUIDE CREATION-----"
+    print_header("STUDY GUIDE CREATION")
     name = raw_input("Enter name of study guide: ").replace("'", "''")
     study_guide_id = db_tools.add_study_guide_to_db(name, user_id)
     create_questions(study_guide_id)
@@ -184,14 +219,14 @@ def create_study_guide(user_id):
 
 def choose_study_guide_to_edit(user_id):
     study_guide = select_study_guide(user_id)
-    edit_study_guide(study_guide)
+    study_guide_edit_menu(study_guide, user_id)
     study_guide_menu(user_id)
 
 
-def edit_study_guide(study_guide_id):
+def edit_questions(study_guide_id, user_id):
     questions = db_tools.get_questions_from_study_guide(study_guide_id)
     ids = []
-    print "-----QUESTIONS-----"
+    print_header("QUESTIONS")
 
     for (question_id, question_text) in questions:
         print "%d. %s" % (question_id, question_text)
@@ -202,10 +237,10 @@ def edit_study_guide(study_guide_id):
     while more_edits:
         while question_selection not in ids:
             question_selection = int(raw_input("Enter ID of question to edit: "))
-        edit_question(question_selection)
+        question_edit_menu(question_selection, study_guide_id, user_id)
         more = ""
         while more != "y" and more != "n":
-            more = raw_input(YELLOW + "More question edits (y/n)?" + DEFAULT)
+            more = raw_input(YELLOW + "More question edits (y/n)? " + DEFAULT)
         more_edits = more == "y"
 
 
@@ -239,9 +274,18 @@ def create_answers(question_id):
         more_answers = more == "y"
         index += 1
 
+def edit_question_text(question_id, study_guide_id, user_id):
+    new_question_text = raw_input("Enter new question text: ").replace("'", "''")
+    db_tools.update_question_text_in_db(question_id, new_question_text)
+    question_edit_menu(question_id, study_guide_id, user_id)
 
-def edit_question(question_id):
-    return
+def delete_question(question_id, study_guide_id, user_id):
+    db_tools.delete_question_from_db(question_id)
+    edit_questions(study_guide_id, user_id)
+
+def delete_study_guide(study_guide_id, user_id):
+    db_tools.delete_study_guide_from_db(study_guide_id)
+    study_guide_menu(user_id)
 
 
 # ******** STUDYING ********
@@ -265,7 +309,7 @@ def study(study_guide_id):
         index += 1
 
     percent_correct = 0 if len(questions) == 0 else (float(num_correct) / float(len(questions))) * 100
-    print "-----RESULTS-----"
+    print_header("RESULTS")
     print "Correct answers: %s / %s = %.2f%%" % (num_correct, len(questions), percent_correct)
     user_menu()
 
@@ -286,13 +330,20 @@ def process_answers(answers):
         entered_answers.add(answer)
     return True
 
-
 def print_answers(answers):
     print "ANSWERS:"
     for index in range (0, len(answers)):
         print "%d. %s" % (index + 1, answers[index])
 
+def print_header(header):
+    print "\n" + BLUE + "-----" + header + "-----" + DEFAULT
 
 # ******** MAIN ********
 if __name__ == '__main__':
-    user_menu()
+    try:
+        user_menu()
+    except SystemExit:
+        raise
+    except Exception:
+        print YELLOW + "Whoops! An error has occurred. Exiting." + DEFAULT
+        quit()

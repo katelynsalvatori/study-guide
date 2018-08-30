@@ -16,7 +16,7 @@ def could_not_access_db():
 
 def get_users():
     try:
-        cursor.execute("""SELECT * FROM users;""")
+        cursor.execute("""SELECT * FROM users ORDER BY id;""")
     except:
         could_not_access_db()
 
@@ -81,10 +81,54 @@ def add_answer_to_db(answer_text, question_id):
     except:
         print "Could not create answer"
 
+def update_question_text_in_db(question_id, new_question_text):
+    try:
+        cursor.execute(
+            """UPDATE questions SET question_text = '%s' WHERE id = %s""" % (new_question_text, question_id))
+        print "Question text updated successfully"
+        connection.commit()
+    except:
+        print "Could not update question text"
+
+def update_answer_text_in_db(answer_id, new_answer_text):
+    try:
+        cursor.execute(
+            """UPDATE answers SET answer_text = '%s' WHERE id = %s""" % (new_answer_text, answer_id))
+        print "Answer text updated successfully"
+        connection.commit()
+    except:
+        print "Could not update answer text"
+
+def delete_question_from_db(question_id):
+    try:
+        cursor.execute(
+            """DELETE FROM questions WHERE id = %s""" % question_id)
+        print "Question deleted successfully"
+        connection.commit()
+    except:
+        print "Could not delete question"
+
+def delete_answer_from_db(answer_id):
+    try:
+        cursor.execute(
+            """DELETE FROM answers WHERE id = %s""" % answer_id)
+        print "Answer deleted successfully"
+        connection.commit()
+    except:
+        print "Could not delete answer"
+
+def delete_study_guide_from_db(study_guide_id):
+    try:
+        cursor.execute(
+            """DELETE FROM study_guides WHERE id = %s""" % study_guide_id)
+        print "Study guide deleted successfully"
+        connection.commit()
+    except:
+        print "Could not delete study guide"
 
 def get_study_guides_for_user(owner_id):
     try:
-        cursor.execute("""SELECT id, name FROM study_guides WHERE owner_id = '%s';""" % owner_id)
+        cursor.execute("""SELECT id, name FROM study_guides WHERE owner_id = '%s' ORDER BY id;""" % owner_id)
     except:
         could_not_access_db()
 
@@ -93,7 +137,7 @@ def get_study_guides_for_user(owner_id):
 
 def get_questions_from_study_guide(study_guide_id):
     try:
-        cursor.execute("""SELECT id, question_text FROM questions WHERE study_guide_id = '%s' and enabled;""" % study_guide_id)
+        cursor.execute("""SELECT id, question_text FROM questions WHERE study_guide_id = '%s' and enabled ORDER BY id;""" % study_guide_id)
     except:
         could_not_access_db()
 
@@ -102,7 +146,7 @@ def get_questions_from_study_guide(study_guide_id):
 
 def get_answers_of_question(question_id):
     try:
-        cursor.execute("""SELECT answer_text FROM answers WHERE question_id = '%s';""" % question_id)
+        cursor.execute("""SELECT answer_text FROM answers WHERE question_id = '%s' ORDER BY id;""" % question_id)
     except:
         could_not_access_db()
 
