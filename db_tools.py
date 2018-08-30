@@ -143,6 +143,13 @@ def get_questions_from_study_guide(study_guide_id):
 
     return cursor.fetchall()
 
+def get_answers_and_ids_of_questions(question_id):
+    try:
+        cursor.execute("""SELECT id, answer_text FROM answers WHERE question_id = '%s' ORDER BY id;""" % question_id)
+    except:
+        could_not_access_db()
+
+    return cursor.fetchall()
 
 def get_answers_of_question(question_id):
     try:

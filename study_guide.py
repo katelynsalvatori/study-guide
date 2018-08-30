@@ -80,14 +80,31 @@ def question_edit_menu(question_id, study_guide_id, user_id):
     if selection is "1":
         edit_question_text(question_id, study_guide_id, user_id)
     elif selection is "2":
-        "ok"
-        # edit answers (text or delete)
+        select_answer_to_edit(question_id, study_guide_id, user_id)
     elif selection is "3":
         create_answers(question_id)
     elif selection is "4":
         delete_question(question_id, study_guide_id, user_id)
     elif selection is "5":
         study_guide_edit_menu(study_guide_id, user_id)
+    else:
+        quit()
+
+def answer_edit_menu(answer_id, question_id, study_guide_id, user_id):
+    choice_texts = [
+        "Edit answer text",
+        "Delete answer",
+        "Go back",
+        "Quit"
+    ]
+    selection = menu(choice_texts, "EDIT ANSWER MENU")
+
+    if selection is "1":
+        edit_answer_text(answer_id, question_id, study_guide_id, user_id)
+    elif selection is "2":
+        delete_answer(answer_id, question_id, study_guide_id, user_id)
+    elif selection is "3":
+        question_edit_menu(question_id, study_guide_id, user_id)
     else:
         quit()
 
@@ -232,16 +249,14 @@ def edit_questions(study_guide_id, user_id):
         print "%d. %s" % (question_id, question_text)
         ids.append(question_id)
 
+    if len(ids) == 0:
+        print "No questions to edit! Please add questions first."
+        study_guide_edit_menu(study_guide_id, user_id)
+
     question_selection = 0
-    more_edits = True
-    while more_edits:
-        while question_selection not in ids:
-            question_selection = int(raw_input("Enter ID of question to edit: "))
-        question_edit_menu(question_selection, study_guide_id, user_id)
-        more = ""
-        while more != "y" and more != "n":
-            more = raw_input(YELLOW + "More question edits (y/n)? " + DEFAULT)
-        more_edits = more == "y"
+    while question_selection not in ids:
+        question_selection = int(raw_input("Enter ID of question to edit: "))
+    question_edit_menu(question_selection, study_guide_id, user_id)
 
 
 def create_questions(study_guide_id):
@@ -274,6 +289,24 @@ def create_answers(question_id):
         more_answers = more == "y"
         index += 1
 
+def select_answer_to_edit(question_id, study_guide_id, user_id):
+    answers = db_tools.get_answers_and_ids_of_questions(question_id)
+    ids = []
+    print_header("ANSWERS")
+
+    for (answer_id, answer_text) in answers:
+        print "%d. %s" % (answer_id, answer_text)
+        ids.append(answer_id)
+
+    if len(ids) == 0:
+        print "No answers to edit! Please add answers first."
+        question_edit_menu(question_id, study_guide_id, user_id)
+
+    answer_selection = 0
+    while answer_selection not in ids:
+        answer_selection = int(raw_input("Enter ID of answer to edit: "))
+    answer_edit_menu(answer_selection, question_id, study_guide_id, user_id)
+
 def edit_question_text(question_id, study_guide_id, user_id):
     new_question_text = raw_input("Enter new question text: ").replace("'", "''")
     db_tools.update_question_text_in_db(question_id, new_question_text)
@@ -281,11 +314,20 @@ def edit_question_text(question_id, study_guide_id, user_id):
 
 def delete_question(question_id, study_guide_id, user_id):
     db_tools.delete_question_from_db(question_id)
-    edit_questions(study_guide_id, user_id)
+    study_guide_edit_menu(study_guide_id, user_id)
 
 def delete_study_guide(study_guide_id, user_id):
     db_tools.delete_study_guide_from_db(study_guide_id)
     study_guide_menu(user_id)
+
+def edit_answer_text(answer_id, question_id, study_guide_id, user_id):
+    new_answer_text = raw_input("Enter new answer text: ").replace("'", "''")
+    db_tools.update_answer_text_in_db(answer_id, new_answer_text)
+    answer_edit_menu(answer_id, question_id, study_guide_id, user_id)
+
+def delete_answer(answer_id, question_id, study_guide_id, user_id):
+    db_tools.delete_answer_from_db(answer_id)
+    question_edit_menu(question_id, study_guide_id, user_id)
 
 
 # ******** STUDYING ********
