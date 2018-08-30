@@ -49,7 +49,7 @@ def study_guide_menu(user_id):
     choice_texts = [
         "Study an existing study guide",
         "Create a new study guide",
-        "Edit a study guide (IN PROGRESS)",
+        "Edit a study guide",
         "Go back",
         "Quit"
     ]
