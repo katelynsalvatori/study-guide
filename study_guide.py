@@ -246,17 +246,17 @@ def edit_questions(study_guide_id, user_id):
     print_header("QUESTIONS")
 
     for (question_id, question_text) in questions:
-        print "%d. %s" % (question_id, question_text)
+        print "%s%d.%s %s" % (GREEN, question_id, DEFAULT, question_text)
         ids.append(question_id)
 
     if len(ids) == 0:
         print "No questions to edit! Please add questions first."
         study_guide_edit_menu(study_guide_id, user_id)
-
-    question_selection = 0
-    while question_selection not in ids:
-        question_selection = int(raw_input("Enter ID of question to edit: "))
-    question_edit_menu(question_selection, study_guide_id, user_id)
+    else:
+        question_selection = 0
+        while question_selection not in ids:
+            question_selection = int(raw_input("%sEnter ID of question to edit: %s" % (GREEN, DEFAULT)))
+            question_edit_menu(question_selection, study_guide_id, user_id)
 
 
 def create_questions(study_guide_id):
