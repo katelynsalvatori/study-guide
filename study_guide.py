@@ -50,6 +50,7 @@ def study_guide_menu(user_id):
         "Study an existing study guide",
         "Create a new study guide",
         "Edit a study guide",
+        "Print a study guide",
         "Go back",
         "Quit"
     ]
@@ -62,6 +63,8 @@ def study_guide_menu(user_id):
     elif selection is "3":
         choose_study_guide_to_edit(user_id)
     elif selection is "4":
+        choose_study_guide_to_print(user_id)
+    elif selection is "5":
         user_menu()
     else:
         quit()
@@ -244,6 +247,10 @@ def choose_study_guide_to_edit(user_id):
     study_guide_edit_menu(study_guide, user_id)
     study_guide_menu(user_id)
 
+def choose_study_guide_to_print(user_id):
+    study_guide = select_study_guide(user_id)
+    write_to_txt(study_guide)
+    study_guide_menu(user_id)
 
 def edit_questions(study_guide_id, user_id):
     questions = db_tools.get_questions_from_study_guide(study_guide_id)
@@ -389,6 +396,24 @@ def print_answers(answers):
 
 def print_header(header):
     print "\n" + BLUE + "-----" + header + "-----" + DEFAULT
+
+def write_to_txt(study_guide_id):
+    study_guide_name = db_tools.get_study_guide_name(study_guide_id)
+    study_guide_text = study_guide_name + "\n\n"
+    questions = db_tools.get_questions_from_study_guide(study_guide_id)
+
+    for i in range(0, len(questions)):
+        question_id, question_text = questions[i]
+        study_guide_text += "%d. %s\n" % (i + 1, question_text)
+        answers = db_tools.get_answers_of_question(question_id)
+        for j in range(0, len(answers)):
+            study_guide_text += "\t%d. %s\n" % (j + 1, answers[j])
+    file_name = "study_guide_%s.txt" % study_guide_name.lower().replace(" ", "_")
+    file = open(file_name, "w")
+    file.write(study_guide_text)
+    file.close()
+
+    print "%s written successfully" % file_name
 
 # ******** MAIN ********
 if __name__ == '__main__':

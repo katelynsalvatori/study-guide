@@ -168,7 +168,7 @@ def get_answers_of_question(question_id):
 
 def get_study_guide_name(study_guide_id):
     cursor.execute("""SELECT name FROM study_guides WHERE id = %s""" % study_guide_id)
-    return cursor.fetchone()
+    return cursor.fetchone()[0]
 
 def get_question_text(question_id):
     cursor.execute("""SELECT question_text FROM questions WHERE id = %s""" % question_id)
