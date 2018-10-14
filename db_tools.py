@@ -99,6 +99,13 @@ def update_answer_text_in_db(answer_id, new_answer_text):
     except:
         print "Could not update answer text"
 
+def update_study_guide_name_in_db(study_guide_id, new_name):
+    try:
+        cursor.execute("""UPDATE study_guides SET name = '%s' WHERE id = %s""" % (new_name, study_guide_id))
+        print "Study guide name updated successfully"
+    except:
+        print "Could not update study guide name"
+
 def delete_question_from_db(question_id):
     try:
         cursor.execute(
@@ -158,3 +165,11 @@ def get_answers_of_question(question_id):
         could_not_access_db()
 
     return [x[0] for x in cursor.fetchall()]
+
+def get_study_guide_name(study_guide_id):
+    cursor.execute("""SELECT name FROM study_guides WHERE id = %s""" % study_guide_id)
+    return cursor.fetchone()
+
+def get_question_text(question_id):
+    cursor.execute("""SELECT question_text FROM questions WHERE id = %s""" % question_id)
+    return cursor.fetchone()

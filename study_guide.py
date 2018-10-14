@@ -75,7 +75,8 @@ def question_edit_menu(question_id, study_guide_id, user_id):
         "Go back",
         "Quit"
     ]
-    selection = menu(choice_texts, "EDIT QUESTION MENU")
+    question_text = db_tools.get_question_text(question_id)
+    selection = menu(choice_texts, "EDIT QUESTION MENU: %s" % question_text)
 
     if selection is "1":
         edit_question_text(question_id, study_guide_id, user_id)
@@ -113,10 +114,12 @@ def study_guide_edit_menu(study_guide_id, user_id):
         "Edit questions/answers",
         "Add question(s)",
         "Delete study guide",
+        "Update study guide's name",
         "Go back",
         "Quit"
     ]
-    selection = menu(choice_texts, "EDIT STUDY GUIDE MENU")
+    study_guide_name = db_tools.get_study_guide_name(study_guide_id)
+    selection = menu(choice_texts, "EDIT STUDY GUIDE MENU: %s" % study_guide_name)
 
     if selection is "1":
         edit_questions(study_guide_id, user_id)
@@ -125,6 +128,8 @@ def study_guide_edit_menu(study_guide_id, user_id):
     elif selection is "3":
         delete_study_guide(study_guide_id, user_id)
     elif selection is "4":
+        update_study_guide_name(study_guide_id, user_id)
+    elif selection is "5":
         study_guide_menu(user_id)
     else:
         quit()
@@ -301,11 +306,11 @@ def select_answer_to_edit(question_id, study_guide_id, user_id):
     if len(ids) == 0:
         print "No answers to edit! Please add answers first."
         question_edit_menu(question_id, study_guide_id, user_id)
-
-    answer_selection = 0
-    while answer_selection not in ids:
-        answer_selection = int(raw_input("Enter ID of answer to edit: "))
-    answer_edit_menu(answer_selection, question_id, study_guide_id, user_id)
+    else:
+        answer_selection = 0
+        while answer_selection not in ids:
+            answer_selection = int(raw_input("Enter ID of answer to edit: "))
+        answer_edit_menu(answer_selection, question_id, study_guide_id, user_id)
 
 def edit_question_text(question_id, study_guide_id, user_id):
     new_question_text = raw_input("Enter new question text: ").replace("'", "''")
@@ -319,6 +324,11 @@ def delete_question(question_id, study_guide_id, user_id):
 def delete_study_guide(study_guide_id, user_id):
     db_tools.delete_study_guide_from_db(study_guide_id)
     study_guide_menu(user_id)
+
+def update_study_guide_name(study_guide_id, user_id):
+    new_name = raw_input("Enter new study guide name: ").replace("'", "''")
+    db_tools.update_study_guide_name_in_db(study_guide_id, new_name)
+    study_guide_edit_menu(study_guide_id, user_id)
 
 def edit_answer_text(answer_id, question_id, study_guide_id, user_id):
     new_answer_text = raw_input("Enter new answer text: ").replace("'", "''")
