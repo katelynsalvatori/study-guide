@@ -155,11 +155,11 @@ def select_user():
         user_menu()
 
     ids = []
-    for (id, name) in users:
-        print("%s: %s" % (id, name))
-        ids.append(id)
+    for (user_id, name) in users:
+        print("%s: %s" % (user_id, name))
+        ids.append(str(user_id))
 
-    while int(selection) not in ids:
+    while selection not in ids:
         selection = raw_input("Enter a user's number: ")
 
     study_guide_menu(int(selection))
@@ -174,14 +174,14 @@ def delete_user():
         user_menu()
 
     ids = []
-    for (id, name) in users:
-        print("%s: %s" % (id, name))
-        ids.append(id)
+    for (user_id, name) in users:
+        print("%s: %s" % (user_id, name))
+        ids.append(str(user_id))
 
-    while int(selection) not in ids:
+    while selection not in ids:
         selection = raw_input("Enter a user's number to delete: ")
 
-    db_tools.delete_user_from_db(selection)
+    db_tools.delete_user_from_db(int(selection))
 
     user_menu()
 
@@ -212,7 +212,7 @@ def update_user_name():
 # ******** STUDY GUIDE MANAGEMENT ********
 def study_study_guide(user_id):
     study_guide = select_study_guide(user_id)
-    study(study_guide)
+    study(study_guide, user_id)
 
 def select_study_guide(user_id):
     print_header("STUDY GUIDES")
@@ -224,11 +224,11 @@ def select_study_guide(user_id):
         print "No study guides for selected user! Please create a study guide."
         study_guide_menu(user_id)
 
-    for (id, name) in study_guides:
-        print("%s: %s" % (id, name))
-        ids.append(id)
+    for (guide_id, name) in study_guides:
+        print("%s: %s" % (guide_id, name))
+        ids.append(str(guide_id))
 
-    while int(selection) not in ids:
+    while selection not in ids:
         selection = raw_input("Enter a study guide number: ")
 
     return int(selection)
@@ -259,16 +259,16 @@ def edit_questions(study_guide_id, user_id):
 
     for (question_id, question_text) in questions:
         print "%s%d.%s %s" % (GREEN, question_id, DEFAULT, question_text)
-        ids.append(question_id)
+        ids.append(str(question_id))
 
     if len(ids) == 0:
         print "No questions to edit! Please add questions first."
         study_guide_edit_menu(study_guide_id, user_id)
     else:
-        question_selection = 0
+        question_selection = ""
         while question_selection not in ids:
-            question_selection = int(raw_input("%sEnter ID of question to edit: %s" % (GREEN, DEFAULT)))
-            question_edit_menu(question_selection, study_guide_id, user_id)
+            question_selection = raw_input("%sEnter ID of question to edit: %s" % (GREEN, DEFAULT))
+        question_edit_menu(int(question_selection), study_guide_id, user_id)
 
 
 def create_questions(study_guide_id):
@@ -281,7 +281,7 @@ def create_questions(study_guide_id):
         question_id = db_tools.add_question_to_db(question_text, study_guide_id)
         create_answers(question_id)
         more = ""
-        while more != "y" and more != "n":
+        while more not in ["y","n"]:
             more = raw_input(YELLOW + "More questions? (y/n): " + DEFAULT)
         more_questions = more == "y"
         index += 1
@@ -296,7 +296,7 @@ def create_answers(question_id):
         answer_text = raw_input("Enter answer text: ").replace("'", "''")
         db_tools.add_answer_to_db(answer_text, question_id)
         more = ""
-        while more != "y" and more != "n":
+        while more not in ["y","n"]:
             more = raw_input(YELLOW + "More answers? (y/n): " + DEFAULT)
         more_answers = more == "y"
         index += 1
@@ -308,16 +308,16 @@ def select_answer_to_edit(question_id, study_guide_id, user_id):
 
     for (answer_id, answer_text) in answers:
         print "%d. %s" % (answer_id, answer_text)
-        ids.append(answer_id)
+        ids.append(str(answer_id))
 
     if len(ids) == 0:
         print "No answers to edit! Please add answers first."
         question_edit_menu(question_id, study_guide_id, user_id)
     else:
-        answer_selection = 0
+        answer_selection = ""
         while answer_selection not in ids:
-            answer_selection = int(raw_input("Enter ID of answer to edit: "))
-        answer_edit_menu(answer_selection, question_id, study_guide_id, user_id)
+            answer_selection = raw_input("Enter ID of answer to edit: ")
+        answer_edit_menu(int(answer_selection), question_id, study_guide_id, user_id)
 
 def edit_question_text(question_id, study_guide_id, user_id):
     new_question_text = raw_input("Enter new question text: ").replace("'", "''")
@@ -348,7 +348,7 @@ def delete_answer(answer_id, question_id, study_guide_id, user_id):
 
 
 # ******** STUDYING ********
-def study(study_guide_id):
+def study(study_guide_id, user_id):
     questions = db_tools.get_questions_from_study_guide(study_guide_id)
     shuffle(questions)
     num_correct = 0
@@ -370,7 +370,7 @@ def study(study_guide_id):
     percent_correct = 0 if len(questions) == 0 else (float(num_correct) / float(len(questions))) * 100
     print_header("RESULTS")
     print "Correct answers: %s / %s = %.2f%%" % (num_correct, len(questions), percent_correct)
-    user_menu()
+    study_guide_menu(user_id)
 
 
 def process_answers(answers):
@@ -423,4 +423,7 @@ if __name__ == '__main__':
         raise
     except Exception:
         print YELLOW + "Whoops! An error has occurred. Exiting." + DEFAULT
+        quit()
+    except KeyboardInterrupt:
+        print YELLOW + "\nExiting." + DEFAULT
         quit()
