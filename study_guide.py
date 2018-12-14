@@ -1,4 +1,5 @@
 from random import shuffle
+from difflib import SequenceMatcher
 import db_tools
 
 # COLORS!
@@ -359,7 +360,7 @@ def study(study_guide_id, user_id):
         print BLUE + "---QUESTION %s---" % index + DEFAULT
         print question_text
         print "(Number of answers: %s)" % len(answers)
-        correct = process_answers([x.lower() for x in answers])
+        correct = process_answers([x.lower().replace("-", " ") for x in answers])
         num_correct += 1 if correct else 0
 
         if not correct:
@@ -372,21 +373,56 @@ def study(study_guide_id, user_id):
     print "Correct answers: %s / %s = %.2f%%" % (num_correct, len(questions), percent_correct)
     study_guide_menu(user_id)
 
+def tokens_match(str1, str2):
+    str1_tokens = str1.split(" ")
+    str2_tokens = str2.split(" ")
+
+    if len(str1_tokens) != len(str2_tokens): return False
+
+    for str1_token in str1_tokens:
+        if str1_token not in str2_tokens: return False
+
+    for str2_token in str2_tokens:
+        if str2_token not in str1_tokens: return False
+
+    return True
+
+def similar_to(answer, possible_answers):
+    most_similar = None
+    most_similar_ratio = 0.0
+
+    for possible_answer in possible_answers:
+
+        if tokens_match(answer, possible_answer): return (possible_answer, 1.0)
+
+        ratio = SequenceMatcher(None, answer, possible_answer).ratio()
+        if ratio > most_similar_ratio:
+            most_similar = possible_answer
+            most_similar_ratio = ratio
+
+    return (most_similar, most_similar_ratio)
 
 def process_answers(answers):
     entered_answers = set()
     for i in range(0, len(answers)):
-        answer = raw_input("Answer %s: " % str(i + 1)).lower()
+        answer = raw_input("Answer %s: " % str(i + 1)).lower().replace("-", " ")
 
         if answer in answers and answer not in entered_answers:
             print GREEN + "Correct answer" + DEFAULT
-        elif answer not in answers:
-            print YELLOW + "Incorrect answer" + DEFAULT
-            return False
-        elif answer in entered_answers:
-            print YELLOW + "You have already entered this answer" + DEFAULT
-            return False
-        entered_answers.add(answer)
+            answers.remove(answer)
+            entered_answers.add(answer)
+        else:
+            similarity = similar_to(answer, answers)
+            if similarity[1] > 0.5 and similarity[0] not in entered_answers:
+                print GREEN + "Partial match" + DEFAULT + "\nCorrect answer: " + similarity[0]
+                answers.remove(similarity[0])
+                entered_answers.add(similarity[0])
+            elif answer not in answers:
+                print YELLOW + "Incorrect answer" + DEFAULT
+                return False
+            elif answer in entered_answers:
+                print YELLOW + "You have already entered this answer" + DEFAULT
+                return False
     return True
 
 def print_answers(answers):
